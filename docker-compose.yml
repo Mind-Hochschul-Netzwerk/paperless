@@ -55,8 +55,6 @@ services:
       - broker
       - gotenberg
       - tika
-    ports:
-      - "8000:8000"
     volumes:
       - "${VOLUMES_DIR}/data:/usr/src/paperless/data"
       - "${VOLUMES_DIR}/media:/usr/src/paperless/media"
@@ -69,6 +67,25 @@ services:
       PAPERLESS_TIKA_ENABLED: 1
       PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
       PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_TIME_ZONE: Europe/Berlin
+      PAPERLESS_OCR_LANGUAGE: deu
+      PAPERLESS_OCR_USER_ARGS: '{"invalidate_digital_signatures": true}'
+      PAPERLESS_CONSUMER_DELETE_DUPLICATES: 'true'
+      PAPERLESS_CONSUMER_ENABLE_BARCODES: 'false'
+      PAPERLESS_CONSUMER_POLLING_DELAY: '10'
+      PAPERLESS_CONSUMER_RECURSIVE: 'true'
+      PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: 'true'
+      PAPERLESS_URL: 'https://${SERVICENAME}.${DOMAINNAME}'
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.${SERVICENAME}.entrypoints=websecure
+      - traefik.http.routers.${SERVICENAME}.rule=Host(`${SERVICENAME}.${DOMAINNAME}`)
+      - traefik.http.routers.${SERVICENAME}.middlewares=secheader@file
+    networks:
+      - traefik
+      - ldap
+      - default
 
   gotenberg:
     image: docker.io/gotenberg/gotenberg:latest
@@ -85,8 +102,10 @@ services:
     image: docker.io/apache/tika:latest
     restart: unless-stopped
 
-volumes:
-  data:
-  media:
-  pgdata:
-  redisdata:
+networks:
+  traefik:
+    name: traefik
+    external: true
+  ldap:
+    name: ldap
+    external: true
