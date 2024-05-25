@@ -102,6 +102,26 @@ services:
     image: docker.io/apache/tika:latest
     restart: unless-stopped
 
+  webdav:
+    image: nginx:stable
+    read_only: true
+    tmpfs:
+      - /run:size=10k
+      - /var/cache/nginx
+      - /tmp
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.${SERVICENAME}-webdav.entrypoints=websecure
+      - traefik.http.routers.${SERVICENAME}-webdav.rule=Host(`${SERVICENAME}-webdav.${DOMAINNAME}`)
+      - traefik.http.routers.${SERVICENAME}-webdav.middlewares=secheader@file,webdavauth
+      - traefik.http.middlewares.webdavauth.basicauth.users=webdav:${PAPERLESS_WEBDAV_PASSWORD_HASH}
+    networks:
+      - traefik
+    volumes:
+      - "${VOLUMES_DIR}/consume:/var/www"
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+
 networks:
   traefik:
     name: traefik
