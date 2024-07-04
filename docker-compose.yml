@@ -76,6 +76,8 @@ services:
       PAPERLESS_CONSUMER_RECURSIVE: 'true'
       PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: 'true'
       PAPERLESS_URL: 'https://${SERVICENAME}.${DOMAINNAME}'
+      USERMAP_UID: 101
+      USERMAP_GID: 101
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik
