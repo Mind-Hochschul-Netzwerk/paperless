@@ -122,6 +122,7 @@ services:
       - traefik.http.middlewares.webdavauth.basicauth.users=webdav:${PAPERLESS_WEBDAV_PASSWORD_HASH}
     networks:
       - traefik
+    restart: unless-stopped
     volumes:
       - "${VOLUMES_DIR}/consume:/var/www"
       - ./default.conf:/etc/nginx/conf.d/default.conf:ro
