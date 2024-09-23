@@ -52,6 +52,7 @@ services:
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     restart: unless-stopped
+    container_name: ${SERVICENAME}
     depends_on:
       - db
       - broker
@@ -84,9 +85,6 @@ services:
       USERMAP_GID: 101
     labels:
       - traefik.enable=true
-      - traefik.docker.network=traefik
-      - traefik.http.routers.${SERVICENAME}.entrypoints=websecure
-      - traefik.http.routers.${SERVICENAME}.rule=Host(`${SERVICENAME}.${DOMAINNAME}`)
       - traefik.http.routers.${SERVICENAME}.middlewares=secheader@file
     networks:
       - traefik
@@ -111,15 +109,13 @@ services:
   webdav:
     image: nginx:stable
     read_only: true
+    container_name: ${SERVICENAME}-webdav
     tmpfs:
       - /run:size=10k
       - /var/cache/nginx
       - /tmp
     labels:
       - traefik.enable=true
-      - traefik.docker.network=traefik
-      - traefik.http.routers.${SERVICENAME}-webdav.entrypoints=websecure
-      - traefik.http.routers.${SERVICENAME}-webdav.rule=Host(`${SERVICENAME}-webdav.${DOMAINNAME}`)
       - traefik.http.routers.${SERVICENAME}-webdav.middlewares=secheader@file,webdavauth
       - traefik.http.middlewares.webdavauth.basicauth.users=webdav:${PAPERLESS_WEBDAV_PASSWORD_HASH}
     networks:
